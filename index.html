@@ -80,8 +80,7 @@
         <img src="images/sugarlump_experience_AR_assets-01.png" style="width: 350px; max-width: 100%; height: auto;">
     </div>
 
-    <!-- Hidden Main Page AR Model - Fixed query crash vector and trailing spaces -->
-    <!-- Hidden Main Page AR Model - Fixed absolute repository URLs -->
+    <!-- Hidden Main Page AR Model - Fixed direct production file server hosting paths -->
     <model-viewer id="reveal" 
         src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_sweet_street_ios_100cm.glb" 
         ar 
@@ -168,7 +167,7 @@
     </style></head>
     <body>
         <model-viewer id="m" 
-            src="Models/203_sweet_street_ios_100cm.glb" 
+            src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_sweet_street_ios_100cm.glb" 
             poster="images/Video Poster_2.png" 
             reveal="auto" loading="eager" interaction-prompt="none" camera-controls>
         </model-viewer>
@@ -254,17 +253,14 @@
             } catch (e) { alert("Error loading certificate template."); }
         });
 
-        // AR BUTTON FIX: Primes hidden audio stack & safely updates layout for WebXR context
+        // FIXED ACTION LISTENER: Forces fallback activation execution path to bypass strict browser engine updates
         document.getElementById('ar-button').addEventListener('click', () => {
-            if (mv.canActivateAR) { 
-                arAudio.play().then(() => {
-                    arAudio.pause(); 
-                }).catch(e => console.log("Audio pipeline initialized:", e));
-                
-                mv.activateAR(); 
-            } else { 
-                alert("AR features require a mobile device."); 
-            }
+            arAudio.play().then(() => {
+                arAudio.pause(); 
+            }).catch(e => console.log("Audio pipeline initialized:", e));
+            
+            // Bypass canActivateAR state tracking loop to force asset engine engagement
+            mv.activateAR(); 
         });
 
         // AR TRACKER STATUS: Detects active camera initialization session & triggers audio playback 
