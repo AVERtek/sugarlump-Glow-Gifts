@@ -11,8 +11,27 @@
         gtag('js', new Date());
         gtag('config', '0-0000000000');
     </script>
-
-<style>
+<!-- ========================================================= -->
+    <!-- REDIRECT TOGGLE: REMOVE "/*" ABOVE AND "*/" BELOW TO ACTIVATE -->
+   <!-- <script>
+        window.location.replace("https://avertek.github.io/404-Redirect/");
+    </script>
+    <style>
+        /* Hide all original site content */
+        .container, script, model-viewer { display: none !important; }
+        
+        /* Show only the fallback message */
+        .redirect-msg { 
+            display: flex !important; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            text-align: center;
+        }
+    </style> --> 
+<!-- ========================================================= -->
+    <style>
         /* Global & Button Styles */
         html, body { margin: 0; padding: 0; overflow-x: hidden; font-family: Google Sans, Noto, Roboto, Helvetica Neue, sans-serif; color: #244376; background-color: #ffff99; }
         .container { max-width: 600px; width: 100%; box-sizing: border-box; padding: 0 10px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
@@ -55,19 +74,17 @@
         <img src="images/sugarlump_experience_AR_assets-01.png" style="width: 350px; max-width: 100%; height: auto;">
     </div>
 
-    <model-viewer id="reveal" 
-        src="Models/203_sweet_street_ios_100cm.glb" 
-        ar 
-        ar-modes="webxr scene-viewer quick-look" 
-        ios-src="Models/203_SWEET_STREET_IOS_100cm_Output.usdz"
-        ar-placement="floor"
-        camera-orbit="0deg 75deg 105%"
-        rotation="0 1.57 0" 
-        interaction-prompt="none">
-    </model-viewer>
+    <!-- Hidden Main Page AR Model -->
+<model-viewer id="reveal" 
+    src="Models/203_sweet_street_ios_100cm.glb?sound=Sound/Street Sweets_mix.mp3" 
+    ar ar-modes="scene-viewer webxr quick-look" 
+    ios-src=" Models/203_SWEET_STREET_IOS_100cm_Output.usdz "
+    ar-placement="floor"
+    camera-orbit="0deg 75deg 105%"
+    rotation="0 1.57 0" 
+    interaction-prompt="none">
+ </model-viewer>
     
-    <audio id="ar-bg-music" src="Sound/Street Sweets_mix.mp3" loop style="display:none;"></audio>
-        
     <p style="text-align:center; font-family: 'Chalet LondonNineteenEighty Regular'; font-weight: bold; color: #000099; font-size: 14px;">make sure Wi-Fi and sound is on!</p>
 
     <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
@@ -105,7 +122,7 @@
     <div class="card">
         <h2 style="font-family:'Chalet LondonNineteenEighty Regular'; color: #000099;">experience 4D Augmented Reality on your phone</h2>
         <img src="images/erin_video_scenes-41.png" style="width: 100%; max-width: 350px;">
-        <h3 id="pc-warning" style="font-family:'Chalet LondonNineteenEighty Regular'; color: #000099; font-size: 14px;"><em>if AR button does not appear on mobile, use another browser.</em></h3>
+        <h3 style="font-family:'Chalet LondonNineteenEighty Regular'; color: #000099; font-size: 14px;"><em>if AR button does not appear on mobile, use another browser.</em></h3>
     </div>
 
     <h1 class="hunt-header">tell all your friends</h1>
@@ -125,13 +142,14 @@
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <script>
-function openRecordingTab() {
+    function openRecordingTab() {
     const recWin = window.open("", "_blank");
     recWin.document.write(`
     <html><head><title>Project Recorder</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"><\/script>
     <style>
         body { margin: 0; background: #ffff99; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; text-align: center; padding: 10px; box-sizing: border-box; }
+        /* Focus strictly on 2D view */
         model-viewer { width: 100%; height: 50vh; --progress-bar-color: #59cbe8; background-color: #ffff99; }
         .instr { background: white; padding: 15px 25px; border-radius: 12px; border: 3px solid #59cbe8; width: 95%; max-width: 600px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         .instr p { font-size: 18px; font-weight: bold; color: #ff69b4; margin: 8px 0; display: flex; align-items: center; justify-content: center; }
@@ -168,86 +186,68 @@ function openRecordingTab() {
     </body></html>`);
     recWin.document.close();
 }
+    document.addEventListener("DOMContentLoaded", function () {
+        const video = document.getElementById('video-overlay');
+        const playBtn = document.getElementById('play-pause-button');
+        const mv = document.getElementById('reveal');
 
-document.addEventListener("DOMContentLoaded", function () {
-    const video = document.getElementById('video-overlay');
-    const playBtn = document.getElementById('play-pause-button');
-    const mv = document.getElementById('reveal');
-    const arAudio = document.getElementById('ar-bg-music');
-    const warningText = document.getElementById('pc-warning');
-
-    function toggleVideo() {
-        if (video.paused) { video.play(); video.muted = false; playBtn.style.display = "none"; }
-        else { video.pause(); playBtn.style.display = "block"; }
-    }
-
-    playBtn.addEventListener('click', toggleVideo);
-    video.addEventListener('click', toggleVideo);
-
-    function openPdfInNewTab(blob, certificateNumber) {
-        const url = URL.createObjectURL(blob);
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `SweetNeighborCertificate_${certificateNumber}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        } else {
-            const newWindow = window.open(url, '_blank');
-            if (!newWindow) alert('Please allow pop-ups to view the certificate.');
+        function toggleVideo() {
+            if (video.paused) { video.play(); video.muted = false; playBtn.style.display = "none"; }
+            else { video.pause(); playBtn.style.display = "block"; }
         }
-    }
 
-    document.getElementById('viewPrintCertificateButton').addEventListener('click', async () => {
-        const { PDFDocument, rgb, StandardFonts } = PDFLib;
-        try {
-            const bytes = await fetch('certificates/sugarlump_app_certificate.pdf').then(res => res.arrayBuffer());
-            const pdfDoc = await PDFDocument.load(bytes);
-            const page = pdfDoc.getPages()[0];
-            const { height } = page.getSize();
-            const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-            const fontR = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            const exp = new Date(); exp.setDate(now.getDate() + 31);
-            const expStr = exp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            const certNo = Date.now().toString().slice(-8);
+        playBtn.addEventListener('click', toggleVideo);
+        video.addEventListener('click', toggleVideo);
 
-            const x = 80; const baseY = height - 250;
-            page.drawText("Glow Gifts", { x, y: baseY + 20, size: 16, font: fontB, color: rgb(8/255, 119/255, 144/255) });
-            page.drawText("Street Sweets", { x, y: baseY, size: 16, font: fontB, color: rgb(254/255, 63/255, 178/255) });
-            page.drawText(`Certificate No: ${certNo}`, { x, y: baseY - 20, size: 12, font: fontR, color: rgb(8/255, 119/255, 144/255) });
-            page.drawText(`Download Date: ${dateStr}`, { x, y: baseY - 40, size: 12, font: fontR, color: rgb(8/255, 119/255, 144/255) });
-            page.drawText(`Valid until: ${expStr}`, { x, y: baseY - 60, size: 14, font: fontB, color: rgb(0.8, 0.2, 0.2) });
-
-            const pdfData = await pdfDoc.save();
-            openPdfInNewTab(new Blob([pdfData], { type: 'application/pdf' }), certNo);
-        } catch (e) { alert("Error loading certificate template."); }
-    });
-
-    // Native baseline trigger to ensure PC text block triggers if environment can't render
-    document.getElementById('ar-button').addEventListener('click', () => {
-        if (mv.canActivateAR) { 
-            arAudio.play().then(() => {
-                arAudio.pause(); 
-            }).catch(e => console.log("Audio stack primed:", e));
-            
-            mv.activateAR(); 
-        } else { 
-            warningText.style.color = "red";
-            warningText.innerHTML = "<strong>AR features require a mobile device. Please open this link on your phone!</strong>";
+        function openPdfInNewTab(blob, certificateNumber) {
+            const url = URL.createObjectURL(blob);
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `SweetNeighborCertificate_${certificateNumber}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                const newWindow = window.open(url, '_blank');
+                if (!newWindow) alert('Please allow pop-ups to view the certificate.');
+            }
         }
-    });
 
-    mv.addEventListener('ar-status', (event) => {
-        if (event.detail.status === 'session-started' || event.detail.status === 'object-placed') {
-            arAudio.play().catch(err => console.log("Audio pipeline sync:", err));
-        }
+        document.getElementById('viewPrintCertificateButton').addEventListener('click', async () => {
+            const { PDFDocument, rgb, StandardFonts } = PDFLib;
+            try {
+                const bytes = await fetch('certificates/sugarlump_app_certificate.pdf').then(res => res.arrayBuffer());
+                const pdfDoc = await PDFDocument.load(bytes);
+                const page = pdfDoc.getPages()[0];
+                const { height } = page.getSize();
+                const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                const fontR = await pdfDoc.embedFont(StandardFonts.Helvetica);
+                
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                const exp = new Date(); exp.setDate(now.getDate() + 31);
+                const expStr = exp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                const certNo = Date.now().toString().slice(-8);
+
+                const x = 80; const baseY = height - 250;
+                page.drawText("Glow Gifts", { x, y: baseY + 20, size: 16, font: fontB, color: rgb(8/255, 119/255, 144/255) });
+                page.drawText("Street Sweets", { x, y: baseY, size: 16, font: fontB, color: rgb(254/255, 63/255, 178/255) });
+                page.drawText(`Certificate No: ${certNo}`, { x, y: baseY - 20, size: 12, font: fontR, color: rgb(8/255, 119/255, 144/255) });
+                page.drawText(`Download Date: ${dateStr}`, { x, y: baseY - 40, size: 12, font: fontR, color: rgb(8/255, 119/255, 144/255) });
+                page.drawText(`Valid until: ${expStr}`, { x, y: baseY - 60, size: 14, font: fontB, color: rgb(0.8, 0.2, 0.2) });
+
+                const pdfData = await pdfDoc.save();
+                openPdfInNewTab(new Blob([pdfData], { type: 'application/pdf' }), certNo);
+            } catch (e) { alert("Error loading certificate template."); }
+        });
+
+        document.getElementById('ar-button').addEventListener('click', () => {
+            if (mv.canActivateAR) { mv.activateAR(); } 
+            else { alert("AR features require a mobile device."); }
+        });
     });
-});
 </script>
 </body>
 </html>
