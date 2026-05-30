@@ -11,6 +11,7 @@
         gtag('js', new Date());
         gtag('config', '0-0000000000');
     </script>
+
 <style>
         /* Global & Button Styles */
         html, body { margin: 0; padding: 0; overflow-x: hidden; font-family: Google Sans, Noto, Roboto, Helvetica Neue, sans-serif; color: #244376; background-color: #ffff99; }
@@ -55,10 +56,10 @@
     </div>
 
     <model-viewer id="reveal" 
-        src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_sweet_street_ios_100cm.glb?v=refresh2026" 
+        src="Models/203_sweet_street_ios_100cm.glb" 
         ar 
-        ar-modes="scene-viewer quick-look" 
-        ios-src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_SWEET_STREET_IOS_100cm_Output.usdz"
+        ar-modes="webxr scene-viewer quick-look" 
+        ios-src="Models/203_SWEET_STREET_IOS_100cm_Output.usdz"
         ar-placement="floor"
         camera-orbit="0deg 75deg 105%"
         rotation="0 1.57 0" 
@@ -139,7 +140,7 @@ function openRecordingTab() {
     </style></head>
     <body>
         <model-viewer id="m" 
-            src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_sweet_street_ios_100cm.glb" 
+            src="Models/203_sweet_street_ios_100cm.glb" 
             poster="images/Video Poster_2.png" 
             reveal="auto" loading="eager" interaction-prompt="none" camera-controls>
         </model-viewer>
@@ -227,7 +228,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (e) { alert("Error loading certificate template."); }
     });
 
-    // Native Model-Viewer click handling to preserve PC check safety pathways
+    // Native baseline trigger to ensure PC text block triggers if environment can't render
     document.getElementById('ar-button').addEventListener('click', () => {
         if (mv.canActivateAR) { 
             arAudio.play().then(() => {
@@ -236,7 +237,6 @@ document.addEventListener("DOMContentLoaded", function () {
             
             mv.activateAR(); 
         } else { 
-            // Desktop fallback tag warning triggers flawlessly here
             warningText.style.color = "red";
             warningText.innerHTML = "<strong>AR features require a mobile device. Please open this link on your phone!</strong>";
         }
@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     mv.addEventListener('ar-status', (event) => {
         if (event.detail.status === 'session-started' || event.detail.status === 'object-placed') {
-            arAudio.play().catch(err => console.log("Audio block bypass:", err));
+            arAudio.play().catch(err => console.log("Audio pipeline sync:", err));
         }
     });
 });
