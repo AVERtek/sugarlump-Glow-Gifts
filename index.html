@@ -11,8 +11,7 @@
         gtag('js', new Date());
         gtag('config', '0-0000000000');
     </script>
-
-    <style>
+<style>
         /* Global & Button Styles */
         html, body { margin: 0; padding: 0; overflow-x: hidden; font-family: Google Sans, Noto, Roboto, Helvetica Neue, sans-serif; color: #244376; background-color: #ffff99; }
         .container { max-width: 600px; width: 100%; box-sizing: border-box; padding: 0 10px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
@@ -47,19 +46,6 @@
         a { color: #59cbe8; text-decoration: none; font-weight: bold; }
         .hunt-header { font-family: 'Chalet LondonNineteenEighty Regular'; color: #ff69b4; text-align: center; width: 100%; margin: 20px 0; }
         model-viewer#reveal { display: none; }
-
-        /* CRITICAL NEW WEBXR OVERLAY TRANSPARENCY FIX */
-        :xr-overlay {
-            background: transparent !important;
-            background-color: transparent !important;
-        }
-        :xr-overlay .container {
-            display: none !important;
-        }
-        :xr-overlay body {
-            background: transparent !important;
-            background-color: transparent !important;
-        }
     </style>
 </head>
 <body>
@@ -68,11 +54,10 @@
         <img src="images/sugarlump_experience_AR_assets-01.png" style="width: 350px; max-width: 100%; height: auto;">
     </div>
 
-    <!-- Hidden Main Page AR Model - Fixed absolute URL -->
     <model-viewer id="reveal" 
-        src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_sweet_street_ios_100cm.glb" 
+        src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_sweet_street_ios_100cm.glb?v=refresh2026" 
         ar 
-        ar-modes="webxr scene-viewer quick-look" 
+        ar-modes="scene-viewer quick-look" 
         ios-src="https://avertek.github.io/sugarlump-Glow-Gifts/Models/203_SWEET_STREET_IOS_100cm_Output.usdz"
         ar-placement="floor"
         camera-orbit="0deg 75deg 105%"
@@ -80,7 +65,6 @@
         interaction-prompt="none">
     </model-viewer>
     
-    <!-- Hidden audio element -->
     <audio id="ar-bg-music" src="Sound/Street Sweets_mix.mp3" loop style="display:none;"></audio>
         
     <p style="text-align:center; font-family: 'Chalet LondonNineteenEighty Regular'; font-weight: bold; color: #000099; font-size: 14px;">make sure Wi-Fi and sound is on!</p>
@@ -199,29 +183,68 @@ document.addEventListener("DOMContentLoaded", function () {
     playBtn.addEventListener('click', toggleVideo);
     video.addEventListener('click', toggleVideo);
 
-    // RESTORE SMART DEVICE CHECK: Keeps PC warning working flawlessly
-    document.getElementById('ar-button').addEventListener('click', () => {
+    function openPdfInNewTab(blob, certificateNumber) {
+        const url = URL.createObjectURL(blob);
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (!isMobile) {
-            // If on a desktop, trigger the warning immediately
-            warningText.style.color = "red";
-            warningText.innerHTML = "<strong>AR features require a mobile device camera. Please open this link on your phone!</strong>";
-            return;
+        if (isMobile) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SweetNeighborCertificate_${certificateNumber}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } else {
+            const newWindow = window.open(url, '_blank');
+            if (!newWindow) alert('Please allow pop-ups to view the certificate.');
         }
+    }
 
-        // On mobile: run background audio trigger handshake and launch AR
-        arAudio.play().then(() => {
-            arAudio.pause(); 
-        }).catch(e => console.log("Audio warm-up:", e));
-        
-        mv.activateAR(); 
+    document.getElementById('viewPrintCertificateButton').addEventListener('click', async () => {
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        try {
+            const bytes = await fetch('certificates/sugarlump_app_certificate.pdf').then(res => res.arrayBuffer());
+            const pdfDoc = await PDFDocument.load(bytes);
+            const page = pdfDoc.getPages()[0];
+            const { height } = page.getSize();
+            const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+            const fontR = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            const exp = new Date(); exp.setDate(now.getDate() + 31);
+            const expStr = exp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            const certNo = Date.now().toString().slice(-8);
+
+            const x = 80; const baseY = height - 250;
+            page.drawText("Glow Gifts", { x, y: baseY + 20, size: 16, font: fontB, color: rgb(8/255, 119/255, 144/255) });
+            page.drawText("Street Sweets", { x, y: baseY, size: 16, font: fontB, color: rgb(254/255, 63/255, 178/255) });
+            page.drawText(`Certificate No: ${certNo}`, { x, y: baseY - 20, size: 12, font: fontR, color: rgb(8/255, 119/255, 144/255) });
+            page.drawText(`Download Date: ${dateStr}`, { x, y: baseY - 40, size: 12, font: fontR, color: rgb(8/255, 119/255, 144/255) });
+            page.drawText(`Valid until: ${expStr}`, { x, y: baseY - 60, size: 14, font: fontB, color: rgb(0.8, 0.2, 0.2) });
+
+            const pdfData = await pdfDoc.save();
+            openPdfInNewTab(new Blob([pdfData], { type: 'application/pdf' }), certNo);
+        } catch (e) { alert("Error loading certificate template."); }
     });
 
-    // AR TRACKER STATUS
+    // Native Model-Viewer click handling to preserve PC check safety pathways
+    document.getElementById('ar-button').addEventListener('click', () => {
+        if (mv.canActivateAR) { 
+            arAudio.play().then(() => {
+                arAudio.pause(); 
+            }).catch(e => console.log("Audio stack primed:", e));
+            
+            mv.activateAR(); 
+        } else { 
+            // Desktop fallback tag warning triggers flawlessly here
+            warningText.style.color = "red";
+            warningText.innerHTML = "<strong>AR features require a mobile device. Please open this link on your phone!</strong>";
+        }
+    });
+
     mv.addEventListener('ar-status', (event) => {
         if (event.detail.status === 'session-started' || event.detail.status === 'object-placed') {
-            arAudio.play().catch(err => console.log("Audio stream running:", err));
+            arAudio.play().catch(err => console.log("Audio block bypass:", err));
         }
     });
 });
