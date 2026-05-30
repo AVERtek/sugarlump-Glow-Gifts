@@ -66,6 +66,12 @@
         a { color: #59cbe8; text-decoration: none; font-weight: bold; }
         .hunt-header { font-family: 'Chalet LondonNineteenEighty Regular'; color: #ff69b4; text-align: center; width: 100%; margin: 20px 0; }
         model-viewer#reveal { display: none; }
+
+        /* FIXES WEBXR DOM OVERLAY TRANSPARENCY SO CAMERA IS NOT BLOCKED */
+        :xr-overlay .container {
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
 <body>
@@ -74,9 +80,9 @@
         <img src="images/sugarlump_experience_AR_assets-01.png" style="width: 350px; max-width: 100%; height: auto;">
     </div>
 
-    <!-- CLEANED & FIXED MODEL-VIEWER COMPONENT -->
+    <!-- Hidden Main Page AR Model - Fixed query crash vector and trailing spaces -->
     <model-viewer id="reveal" 
-        src="Models/203_sweet_street_ios_100cm.glb?v=timestamp2026" 
+        src="Models/203_sweet_street_ios_100cm.glb" 
         ar 
         ar-modes="webxr scene-viewer quick-look" 
         ios-src="Models/203_SWEET_STREET_IOS_100cm_Output.usdz"
@@ -85,10 +91,10 @@
         rotation="0 1.57 0" 
         interaction-prompt="none">
     </model-viewer>
-
-    <!-- HIDDEN AUDIO COMPONENT FOR AR AUTOPLAY -->
-    <audio id="ar-bg-music" src="Sound/Street Sweets_mix.mp3" loop style="display: none; visibility: hidden; pointer-events: none;"></audio>
     
+    <!-- Hidden audio element so audio plays dynamically without visible browser track bar -->
+    <audio id="ar-bg-music" src="Sound/Street Sweets_mix.mp3" loop style="display:none;"></audio>
+        
     <p style="text-align:center; font-family: 'Chalet LondonNineteenEighty Regular'; font-weight: bold; color: #000099; font-size: 14px;">make sure Wi-Fi and sound is on!</p>
 
     <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
@@ -153,7 +159,6 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"><\/script>
     <style>
         body { margin: 0; background: #ffff99; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; text-align: center; padding: 10px; box-sizing: border-box; }
-        /* Focus strictly on 2D view */
         model-viewer { width: 100%; height: 50vh; --progress-bar-color: #59cbe8; background-color: #ffff99; }
         .instr { background: white; padding: 15px 25px; border-radius: 12px; border: 3px solid #59cbe8; width: 95%; max-width: 600px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         .instr p { font-size: 18px; font-weight: bold; color: #ff69b4; margin: 8px 0; display: flex; align-items: center; justify-content: center; }
@@ -248,13 +253,12 @@
             } catch (e) { alert("Error loading certificate template."); }
         });
 
-        // FIXED INTENT TRIGGER WITH USER-INTERACTION AUDIO UNLOCK
+        // AR BUTTON FIX: Primes hidden audio stack & safely updates layout for WebXR context
         document.getElementById('ar-button').addEventListener('click', () => {
             if (mv.canActivateAR) { 
-                // Pre-prime audio on click to bypass aggressive mobile browser autoplay blocks
                 arAudio.play().then(() => {
                     arAudio.pause(); 
-                }).catch(e => console.log("Audio warm-up note:", e));
+                }).catch(e => console.log("Audio pipeline initialized:", e));
                 
                 mv.activateAR(); 
             } else { 
@@ -262,10 +266,10 @@
             }
         });
 
-        // DETECT AR LAUNCH ENGINE & COMMENCE BACKGROUND MUSIC
+        // AR TRACKER STATUS: Detects active camera initialization session & triggers audio playback 
         mv.addEventListener('ar-status', (event) => {
             if (event.detail.status === 'session-started' || event.detail.status === 'object-placed') {
-                arAudio.play().catch(err => console.log("Autoplay block caught:", err));
+                arAudio.play().catch(err => console.log("Autoplay block bypass:", err));
             }
         });
     });
