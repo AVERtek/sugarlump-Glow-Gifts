@@ -74,16 +74,20 @@
         <img src="images/sugarlump_experience_AR_assets-01.png" style="width: 350px; max-width: 100%; height: auto;">
     </div>
 
-    <!-- Hidden Main Page AR Model -->
-<model-viewer id="reveal" 
-    src="Models/203_sweet_street_ios_100cm.glb?sound=Sound/Street Sweets_mix.mp3" 
-    ar ar-modes="scene-viewer webxr quick-look" 
-    ios-src=" Models/203_SWEET_STREET_IOS_100cm_Output.usdz "
-    ar-placement="floor"
-    camera-orbit="0deg 75deg 105%"
-    rotation="0 1.57 0" 
-    interaction-prompt="none">
- </model-viewer>
+    <!-- CLEANED & FIXED MODEL-VIEWER COMPONENT -->
+    <model-viewer id="reveal" 
+        src="Models/203_sweet_street_ios_100cm.glb" 
+        ar 
+        ar-modes="scene-viewer webxr quick-look" 
+        ios-src="Models/203_SWEET_STREET_IOS_100cm_Output.usdz"
+        ar-placement="floor"
+        camera-orbit="0deg 75deg 105%"
+        rotation="0 1.57 0" 
+        interaction-prompt="none">
+    </model-viewer>
+
+    <!-- HIDDEN AUDIO COMPONENT FOR AR AUTOPLAY -->
+    <audio id="ar-bg-music" src="Sound/Street Sweets_mix.mp3" loop style="display: none; visibility: hidden; pointer-events: none;"></audio>
     
     <p style="text-align:center; font-family: 'Chalet LondonNineteenEighty Regular'; font-weight: bold; color: #000099; font-size: 14px;">make sure Wi-Fi and sound is on!</p>
 
@@ -190,6 +194,7 @@
         const video = document.getElementById('video-overlay');
         const playBtn = document.getElementById('play-pause-button');
         const mv = document.getElementById('reveal');
+        const arAudio = document.getElementById('ar-bg-music');
 
         function toggleVideo() {
             if (video.paused) { video.play(); video.muted = false; playBtn.style.display = "none"; }
@@ -243,9 +248,25 @@
             } catch (e) { alert("Error loading certificate template."); }
         });
 
+        // FIXED INTENT TRIGGER WITH USER-INTERACTION AUDIO UNLOCK
         document.getElementById('ar-button').addEventListener('click', () => {
-            if (mv.canActivateAR) { mv.activateAR(); } 
-            else { alert("AR features require a mobile device."); }
+            if (mv.canActivateAR) { 
+                // Pre-prime audio on click to bypass aggressive mobile browser autoplay blocks
+                arAudio.play().then(() => {
+                    arAudio.pause(); 
+                }).catch(e => console.log("Audio warm-up note:", e));
+                
+                mv.activateAR(); 
+            } else { 
+                alert("AR features require a mobile device."); 
+            }
+        });
+
+        // DETECT AR LAUNCH ENGINE & COMMENCE BACKGROUND MUSIC
+        mv.addEventListener('ar-status', (event) => {
+            if (event.detail.status === 'session-started' || event.detail.status === 'object-placed') {
+                arAudio.play().catch(err => console.log("Autoplay block caught:", err));
+            }
         });
     });
 </script>
